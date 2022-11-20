@@ -1,0 +1,7 @@
+/.env
+/bin
+/node_modules
+/internal/server/assets/dist/*
+dist/
+/tools
+/tmp

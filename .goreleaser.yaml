@@ -1,0 +1,69 @@
+project_name: deformd
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+    # you may remove this if you don't need go generate
+    - go generate ./...
+    - make GITCHLOG_ARGS="--next-tag {{ incpatch .Version }}-next --output CHANGELOG.md" changelog
+    - make tailwind
+    - make dump-config
+builds:
+  - id: frmd
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s
+      - -w
+      - -X 'main.GitRef={{ .Commit }}'
+      - -X 'main.ProjectVersion={{ .Version }}' 
+      - -X 'main.BuildDate={{ .Date }}'
+    gcflags:
+      - -trimpath="${PWD}"
+    asmflags:
+      - -trimpath="${PWD}"
+    goos:
+      - linux
+      - windows
+      - darwin
+    main: ./cmd/deformd
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+nfpms:
+  - package_name: deformd
+    homepage: https://github.com/Bornholm/deformd
+    maintainer: William Petit <william.petit@ptitcloud.fr>
+    description: |-
+      Simple and self-hosted form as a service.
+    license: AGPL-3.0
+    formats:
+      - apk
+      - deb
+      - rpm
+    contents:
+      - src: tmp/config.yml
+        dst: /etc/deformd/config.yml
+        type: config
+      - src: misc/packaging/deformd.systemd.service
+        dst: /usr/lib/systemd/system/deformd.service
+      - src: misc/packaging/deformd.openrc.sh
+        dst: /etc/init.d/deformd
+        file_info:
+          mode: 0755
+    scripts:
+      postinstall: "misc/packaging/postinstall.sh"
