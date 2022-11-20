@@ -1,0 +1,56 @@
+logger:
+  level: 0
+  format: human
+http:
+  host: "0.0.0.0"
+  port: 3000
+forms:
+  testform:
+    fields:
+      - name: firstname
+        label: First name
+        type: text
+        required: true
+      - name: lastname
+        label: Last name
+        type: text
+        required: true
+      - name: email
+        label: Email
+        type: email
+        required: true
+      - name: age
+        label: Age
+        type: number
+        min: 0
+        max: 100
+      - name: message
+        label: Message
+        type: text
+        multiline: true
+        required: true
+      - name: submit
+        label: Submit
+        type: submit
+    handler:
+      script: |
+        email.send(ctx, {
+          "from": params.get("from"),
+          "to": [params.get("to")],
+          "subject": "[Contact] New message",
+          "body": JSON.stringify(form)
+        });
+      config:
+        modules:
+          email:
+            host: "${DEFORMD_TESTFORM_MODULE_EMAIL_HOST}"
+            port: "${DEFORMD_TESTFORM_MODULE_EMAIL_PORT}"
+            username: "${DEFORMD_TESTFORM_MODULE_EMAIL_USERNAME}"
+            password: "${DEFORMD_TESTFORM_MODULE_EMAIL_PASSWORD}"
+            insecureSkipVerify: "${DEFORMD_TESTFORM_MODULE_EMAIL_INSECURE_SKIP_VERIFY}"
+            useSSL: true
+            authType: PLAIN
+            tlsPolicy: 1
+          params: 
+            from: "${DEFORMD_TESTFORM_MODULE_PARAMS_FROM}"
+            to: "${DEFORMD_TESTFORM_MODULE_PARAMS_TO}"
