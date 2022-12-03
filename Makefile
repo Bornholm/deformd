@@ -79,7 +79,7 @@ start-release:
 	# Update package.json version
 	jq '.version = "$(DEFORMD_VERSION)"' package.json | sponge package.json
 	git add  package.json
-	git commit -m "chore: bump to version $(DEFORMD_VERSION)"
+	git commit -m "chore: bump to version $(DEFORMD_VERSION)" --allow-empty
 
 	# Generate updated changelog
 	$(MAKE) GITCHLOG_ARGS='--next-tag $(DEFORMD_VERSION)' changelog
