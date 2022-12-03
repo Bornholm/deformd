@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 Restart=always
-ExecStart=/usr/bin/deformd --config /etc/deformd/config.yml
+ExecStart=/usr/bin/deformd run --config /etc/deformd/config.yml
 
 [Install]
 WantedBy=multi-user.target
