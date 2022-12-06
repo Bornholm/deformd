@@ -11,12 +11,14 @@ import (
 	"github.com/Bornholm/deformd/internal/server/template"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/gorilla/sessions"
 	"github.com/pkg/errors"
 	"gitlab.com/wpetit/goweb/logger"
 )
 
 type Server struct {
-	conf *config.Config
+	conf  *config.Config
+	store *sessions.CookieStore
 }
 
 type OnUpdateFunc func(values interface{}) error
@@ -94,7 +96,10 @@ func New(funcs ...OptionFunc) *Server {
 		fn(opt)
 	}
 
+	store := sessions.NewCookieStore()
+
 	return &Server{
-		conf: opt.Config,
+		conf:  opt.Config,
+		store: store,
 	}
 }

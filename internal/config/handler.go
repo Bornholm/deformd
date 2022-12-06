@@ -30,4 +30,4 @@ type EmailModuleConfig struct {
 	UseSSL             *InterpolatedBool   `yaml:"useSSL"`
 }
 
-type ParamsConfig map[string]interface{}
+type ParamsConfig = InterpolatedMap

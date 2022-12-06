@@ -46,14 +46,21 @@ build-deformd: deps tailwind ## Build executable
 		-o ./bin/deformd \
 		./cmd/deformd
 
+.env:
+	cp -f .env.dist .env
+
+tmp/config.yml:
+	mkdir -p tmp
+	bin/deformd config dump > tmp/config.yml
+
+run-deformd: .env
+	( set -o allexport && source .env && set +o allexport && bin/deformd $(DEFORMD_CMD))
+
 .PHONY: tailwind
 tailwind: deps
 	npx tailwindcss -i ./internal/server/assets/src/main.css -o ./internal/server/assets/dist/main.css $(TAILWINDCSS_ARGS)
 
 internal/server/assets/dist/main.css: tailwind
-
-.env:
-	cp .env.dist .env
 
 .PHONY: deps
 deps: .env node_modules
