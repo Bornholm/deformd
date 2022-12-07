@@ -75,8 +75,6 @@ func MessageModuleFactory() handler.ModuleFactory {
 	}
 }
 
-type contextKey string
-
 type MessageStack struct {
 	messages []*Message
 }

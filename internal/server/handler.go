@@ -50,8 +50,12 @@ func configureModules(conf config.ModulesConfig) []handler.ModuleFactory {
 		modules = append(modules, configureParamsModule(conf.Params))
 	}
 
-	modules = append(modules, module.ConsoleModuleFactory(nil))
-	modules = append(modules, module.MessageModuleFactory())
+	modules = append(
+		modules,
+		module.ConsoleModuleFactory(nil),
+		module.MessageModuleFactory(),
+		module.RedirectModuleFactory(),
+	)
 
 	return modules
 }

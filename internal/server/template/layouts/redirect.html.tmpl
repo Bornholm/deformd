@@ -1,0 +1,20 @@
+<html class="w-full h-full">
+    <head>
+        <title>Redirection...</title>
+        <meta http-equiv="refresh" content="10; url={{ .RedirectURL }}">
+        <link rel="stylesheet" href="{{ .BaseURL }}assets/dist/main.css" />
+    </head>
+    <body class="bg-gray-100 w-full h-full p-3 flex justify-center items-center">
+        <div class="w-full max-w-xs">
+            <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <div class="mb-4">
+                    {{ template "messages" . }}
+                    <a class="text-blue-600 hover:text-blue-700"
+                        href="{{ .RedirectURL }}">
+                    You will be automatically redirected to "{{ .RedirectURL }}" in 10 seconds...
+                    </a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

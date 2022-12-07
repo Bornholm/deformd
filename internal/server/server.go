@@ -79,6 +79,7 @@ func (s *Server) run(parentCtx context.Context, addrs chan net.Addr, errs chan e
 
 	router.Get("/forms/{formID}", s.serveForm)
 	router.Post("/forms/{formID}", s.handleForm)
+	router.Get("/forms/{formID}/redirect", s.handleRedirect)
 	router.Handle("/assets/*", assetsHandler)
 
 	logger.Info(ctx, "http server listening")
