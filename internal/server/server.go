@@ -11,12 +11,14 @@ import (
 	"github.com/Bornholm/deformd/internal/server/template"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/gorilla/sessions"
 	"github.com/pkg/errors"
 	"gitlab.com/wpetit/goweb/logger"
 )
 
 type Server struct {
-	conf *config.Config
+	conf  *config.Config
+	store *sessions.CookieStore
 }
 
 type OnUpdateFunc func(values interface{}) error
@@ -77,6 +79,7 @@ func (s *Server) run(parentCtx context.Context, addrs chan net.Addr, errs chan e
 
 	router.Get("/forms/{formID}", s.serveForm)
 	router.Post("/forms/{formID}", s.handleForm)
+	router.Get("/forms/{formID}/redirect", s.handleRedirect)
 	router.Handle("/assets/*", assetsHandler)
 
 	logger.Info(ctx, "http server listening")
@@ -94,7 +97,10 @@ func New(funcs ...OptionFunc) *Server {
 		fn(opt)
 	}
 
+	store := sessions.NewCookieStore()
+
 	return &Server{
-		conf: opt.Config,
+		conf:  opt.Config,
+		store: store,
 	}
 }

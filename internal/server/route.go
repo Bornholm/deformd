@@ -7,6 +7,7 @@ import (
 
 	"github.com/Bornholm/deformd/internal/config"
 	"github.com/Bornholm/deformd/internal/form"
+	"github.com/Bornholm/deformd/internal/handler/module"
 	"github.com/Bornholm/deformd/internal/server/template"
 	"github.com/go-chi/chi"
 	"github.com/pkg/errors"
@@ -14,9 +15,10 @@ import (
 )
 
 type templateData struct {
-	BaseURL string
-	Form    *form.Form
-	Values  url.Values
+	BaseURL  string
+	Form     *form.Form
+	Values   url.Values
+	Messages *module.MessageStack
 }
 
 func (s *Server) serveForm(w http.ResponseWriter, r *http.Request) {
@@ -25,9 +27,15 @@ func (s *Server) serveForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	messageStack, err := s.getFlashMessageStack(w, r)
+	if err != nil {
+		panic(errors.WithStack(err))
+	}
+
 	data := templateData{
-		BaseURL: string(s.conf.HTTP.BaseURL),
-		Form:    form,
+		BaseURL:  string(s.conf.HTTP.BaseURL),
+		Form:     form,
+		Messages: messageStack,
 	}
 
 	if err := template.Exec("form.html.tmpl", w, data); err != nil {
@@ -60,6 +68,9 @@ func (s *Server) handleForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	messageStack, ctx := module.WithNewMessageStack(ctx)
+	redirectURL, ctx := module.WithRedirectURL(ctx)
+
 	if err := handler.Process(ctx, r.Form); err != nil {
 		logger.Error(ctx, "could not process form", logger.E(errors.WithStack(err)))
 
@@ -68,13 +79,61 @@ func (s *Server) handleForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := templateData{
-		BaseURL: string(s.conf.HTTP.BaseURL),
-		Form:    form,
-		Values:  r.Form,
+	if messageStack.HasError() {
+		data := templateData{
+			BaseURL:  string(s.conf.HTTP.BaseURL),
+			Form:     form,
+			Values:   r.Form,
+			Messages: messageStack,
+		}
+
+		if err := template.Exec("form.html.tmpl", w, data); err != nil {
+			panic(errors.WithStack(err))
+		}
+
+		return
 	}
 
-	if err := template.Exec("form.html.tmpl", w, data); err != nil {
+	if err := s.setFlashMessageStack(w, messageStack); err != nil {
+		panic(errors.WithStack(err))
+	}
+
+	if redirectURL != nil && *redirectURL != "" {
+		if err := s.setFlashRedirectURL(w, *redirectURL); err != nil {
+			panic(errors.WithStack(err))
+		}
+
+		http.Redirect(w, r, r.URL.String()+"/redirect", http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, r.URL.String(), http.StatusSeeOther)
+	}
+}
+
+func (s *Server) handleRedirect(w http.ResponseWriter, r *http.Request) {
+	form := s.getForm(w, r)
+	if form == nil {
+		return
+	}
+
+	messageStack, err := s.getFlashMessageStack(w, r)
+	if err != nil {
+		panic(errors.Wrap(err, "could not retrieve message stack"))
+	}
+
+	redirectURL, err := s.getFlashRedirectURL(w, r)
+	if err != nil {
+		panic(errors.Wrap(err, "could not retrieve redirect url"))
+	}
+
+	if err := template.Exec("redirect.html.tmpl", w, struct {
+		BaseURL     string
+		Messages    *module.MessageStack
+		RedirectURL string
+	}{
+		BaseURL:     string(s.conf.HTTP.BaseURL),
+		Messages:    messageStack,
+		RedirectURL: redirectURL,
+	}); err != nil {
 		panic(errors.WithStack(err))
 	}
 }

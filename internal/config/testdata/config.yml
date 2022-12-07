@@ -5,7 +5,7 @@ http:
   host: "0.0.0.0"
   port: 3000
 forms:
-  testform:
+  contact:
     fields:
       - name: firstname
         label: First name
@@ -34,23 +34,33 @@ forms:
         type: submit
     handler:
       script: |
+        var body = "" +
+          "First name: " + form.firstname + "\n" +
+          "Last name: " " + form.lastname + "\n" +
+          "Age: " + form.age + "\n" +
+          "Email: " + form.email + "\n" +
+          "Message: \n" + form.message
+        ;
+
         email.send(ctx, {
           "from": params.get("from"),
           "to": [params.get("to")],
           "subject": "[Contact] New message",
-          "body": JSON.stringify(form)
+          "body": body
         });
+
+        message.success(ctx, "Your message has been sent.");
       config:
         modules:
           email:
-            host: "${DEFORMD_TESTFORM_MODULE_EMAIL_HOST}"
-            port: "${DEFORMD_TESTFORM_MODULE_EMAIL_PORT}"
-            username: "${DEFORMD_TESTFORM_MODULE_EMAIL_USERNAME}"
-            password: "${DEFORMD_TESTFORM_MODULE_EMAIL_PASSWORD}"
-            insecureSkipVerify: "${DEFORMD_TESTFORM_MODULE_EMAIL_INSECURE_SKIP_VERIFY}"
+            host: "${DEFORMD_CONTACT_MODULE_EMAIL_HOST}"
+            port: "${DEFORMD_CONTACT_MODULE_EMAIL_PORT}"
+            username: "${DEFORMD_CONTACT_MODULE_EMAIL_USERNAME}"
+            password: "${DEFORMD_CONTACT_MODULE_EMAIL_PASSWORD}"
+            insecureSkipVerify: "${DEFORMD_CONTACT_MODULE_EMAIL_INSECURE_SKIP_VERIFY}"
             useSSL: true
             authType: PLAIN
             tlsPolicy: 1
           params: 
-            from: "${DEFORMD_TESTFORM_MODULE_PARAMS_FROM}"
-            to: "${DEFORMD_TESTFORM_MODULE_PARAMS_TO}"
+            from: "${DEFORMD_CONTACT_MODULE_PARAMS_FROM}"
+            to: "${DEFORMD_CONTACT_MODULE_PARAMS_TO}"

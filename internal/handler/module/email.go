@@ -13,7 +13,6 @@ const EmailModuleName = "email"
 
 // EmailModule provides email sending utilities.
 type EmailModule struct {
-	ctx     context.Context
 	host    string
 	options []mail.Option
 }

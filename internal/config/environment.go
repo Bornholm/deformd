@@ -74,3 +74,30 @@ func (ib *InterpolatedBool) UnmarshalYAML(value *yaml.Node) error {
 
 	return nil
 }
+
+type InterpolatedMap map[string]interface{}
+
+func (im *InterpolatedMap) UnmarshalYAML(value *yaml.Node) error {
+	var data map[string]interface{}
+
+	if err := value.Decode(&data); err != nil {
+		return errors.Wrapf(err, "could not decode value '%v' (line '%d') into map", value.Value, value.Line)
+	}
+
+	for key, value := range data {
+		strVal, ok := value.(string)
+		if !ok {
+			continue
+		}
+
+		if match := reVar.FindStringSubmatch(strVal); len(match) > 0 {
+			strVal = os.Getenv(match[1])
+		}
+
+		data[key] = strVal
+	}
+
+	*im = data
+
+	return nil
+}

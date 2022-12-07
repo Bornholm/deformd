@@ -1,0 +1,25 @@
+{{define "messages"}}
+{{ $types := messageTypes }}
+{{with .Messages}}
+{{range .All}}
+{{ $bgColorClass := "bg-gray-50" }}
+{{ $textColorClass := "text-gray-500" }}
+{{if eq .Type $types.Success }}
+{{ $bgColorClass = "bg-green-100" }}
+{{ $textColorClass = "text-green-700" }}
+{{else if eq .Type $types.Info }}
+{{ $bgColorClass = "bg-blue-100" }}
+{{ $textColorClass = "text-blue-700" }}
+{{else if eq .Type $types.Warn }}
+{{ $bgColorClass = "bg-yellow-100" }}
+{{ $textColorClass = "text-yellow-700" }}
+{{else if eq .Type $types.Error }}
+{{ $bgColorClass = "bg-red-100" }}
+{{ $textColorClass = "text-red-700" }}
+{{end}}
+<div class="{{ $bgColorClass }} rounded-lg py-5 px-6 mb-4 text-base {{ $textColorClass }} mb-4" role="alert">
+  {{ .Text }}
+</div>
+{{end}}
+{{end}}
+{{end}}

@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"path"
 
+	"github.com/Bornholm/deformd/internal/handler/module"
 	"github.com/Masterminds/sprig/v3"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
@@ -157,6 +158,24 @@ func customHelpers(tpl *template.Template) template.FuncMap {
 			}
 
 			return template.HTML(buf.String()), nil
+		},
+		"messageTypes": func() struct {
+			Success module.MessageType
+			Info    module.MessageType
+			Warn    module.MessageType
+			Error   module.MessageType
+		} {
+			return struct {
+				Success module.MessageType
+				Info    module.MessageType
+				Warn    module.MessageType
+				Error   module.MessageType
+			}{
+				Success: module.MessageTypeSuccess,
+				Info:    module.MessageTypeInfo,
+				Warn:    module.MessageTypeWarn,
+				Error:   module.MessageTypeError,
+			}
 		},
 	}
 }

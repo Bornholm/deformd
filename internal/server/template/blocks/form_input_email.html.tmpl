@@ -1,6 +1,13 @@
 {{define "form_input_email"}}
 <div class="mb-4">
     <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ .Field.Name }}">{{ .Field.Label }}</label>
-    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="{{ .Field.Name }}" name="{{ .Field.Name }}" type="email" placeholder="{{ .Field.Name }}" value="{{ .Values.Get .Field.Name }}">
+    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+        id="{{ .Field.Name }}" 
+        name="{{ .Field.Name }}" 
+        type="email" 
+        placeholder="{{ .Field.Name }}" 
+        value="{{ .Values.Get .Field.Name }}"
+        {{if .Field.Required}}required="true"{{end}}
+    >
 </div>
 {{end}}
