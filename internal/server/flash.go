@@ -45,6 +45,8 @@ func (s *Server) getFlashMessageStack(w http.ResponseWriter, r *http.Request) (*
 		return nil, errors.WithStack(err)
 	}
 
+	s.clearFlash(w, flashKeyMessageStack)
+
 	return module.NewMessageStack(messageStack.Messages...), nil
 }
 
@@ -68,6 +70,8 @@ func (s *Server) getFlashRedirectURL(w http.ResponseWriter, r *http.Request) (st
 		return "", errors.WithStack(err)
 	}
 
+	s.clearFlash(w, flashKeyRedirectURL)
+
 	return string(data), nil
 }
 
@@ -75,6 +79,12 @@ func (s *Server) setFlashRedirectURL(w http.ResponseWriter, url string) error {
 	s.setFlash(w, flashKeyRedirectURL, []byte(url))
 
 	return nil
+}
+
+func (s *Server) clearFlash(w http.ResponseWriter, name string) {
+	cookie := &http.Cookie{Name: name, Value: ""}
+
+	http.SetCookie(w, cookie)
 }
 
 func (s *Server) setFlash(w http.ResponseWriter, name string, value []byte) {
