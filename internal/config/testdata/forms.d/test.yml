@@ -1,0 +1,8 @@
+forms:
+  test:
+    fields:
+      - name: message
+        label: Message
+        type: text
+        multiline: true
+        required: true

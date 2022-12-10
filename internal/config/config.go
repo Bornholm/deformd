@@ -3,6 +3,7 @@ package config
 import (
 	"io"
 	"io/ioutil"
+	"path/filepath"
 
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
@@ -10,22 +11,53 @@ import (
 
 // Config definition
 type Config struct {
-	HTTP   HTTPConfig            `yaml:"http"`
-	Logger LoggerConfig          `yaml:"logger"`
-	Forms  map[string]FormConfig `yaml:"forms"`
+	HTTP    HTTPConfig            `yaml:"http"`
+	Logger  LoggerConfig          `yaml:"logger"`
+	Forms   map[string]FormConfig `yaml:"forms"`
+	Include []InterpolatedString  `yaml:"include"`
+}
+
+func (c *Config) LoadIncludes(baseDir string) error {
+	for _, inc := range c.Include {
+		pattern := filepath.Join(baseDir, string(inc))
+
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+
+		for _, m := range matches {
+			data, err := ioutil.ReadFile(m)
+			if err != nil {
+				return errors.Wrapf(err, "could not read file '%s'", m)
+			}
+
+			if err := yaml.Unmarshal(data, c); err != nil {
+				return errors.Wrapf(err, "could not unmarshal configuration")
+			}
+		}
+	}
+
+	return nil
 }
 
 // NewFromFile retrieves the configuration from the given file
-func NewFromFile(filepath string) (*Config, error) {
+func NewFromFile(path string) (*Config, error) {
 	config := NewDefault()
 
-	data, err := ioutil.ReadFile(filepath)
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not read file '%s'", filepath)
+		return nil, errors.Wrapf(err, "could not read file '%s'", path)
 	}
 
 	if err := yaml.Unmarshal(data, config); err != nil {
 		return nil, errors.Wrapf(err, "could not unmarshal configuration")
+	}
+
+	baseDir := filepath.Dir(path)
+
+	if err := config.LoadIncludes(baseDir); err != nil {
+		return nil, errors.WithStack(err)
 	}
 
 	return config, nil

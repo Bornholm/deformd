@@ -1,26 +1,19 @@
 package config
 
 import (
-	"io/ioutil"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v3"
 )
 
 func TestConfigLoad(t *testing.T) {
-	config := NewDefault()
-
 	filepath := "./testdata/config.yml"
 
-	data, err := ioutil.ReadFile(filepath)
+	conf, err := NewFromFile(filepath)
 	if err != nil {
-		t.Fatal(errors.Wrapf(err, "could not read file '%s'", filepath))
+		t.Fatal(errors.WithStack(err))
 	}
 
-	if err := yaml.Unmarshal(data, config); err != nil {
-		t.Fatal(errors.Wrapf(err, "could not unmarshal configuration"))
-	}
-
-	// t.Logf("%s", spew.Sdump(config))
+	t.Logf("%s", spew.Sdump(conf))
 }
