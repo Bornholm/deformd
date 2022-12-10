@@ -34,10 +34,15 @@ func Run() *cli.Command {
 
 			addrs, srvErrs := srv.Start(ctx.Context)
 
-			url := fmt.Sprintf("http://%s", (<-addrs).String())
-			url = strings.Replace(url, "0.0.0.0", "127.0.0.1", 1)
+			select {
+			case addr := <-addrs:
+				url := fmt.Sprintf("http://%s", addr.String())
+				url = strings.Replace(url, "0.0.0.0", "127.0.0.1", 1)
 
-			logger.Info(ctx.Context, "listening", logger.F("url", url))
+				logger.Info(ctx.Context, "listening", logger.F("url", url))
+			case err = <-srvErrs:
+				return errors.WithStack(err)
+			}
 
 			if err = <-srvErrs; err != nil {
 				return errors.WithStack(err)

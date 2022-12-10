@@ -33,6 +33,11 @@ func (s *Server) Start(ctx context.Context) (<-chan net.Addr, <-chan error) {
 }
 
 func (s *Server) run(parentCtx context.Context, addrs chan net.Addr, errs chan error) {
+	defer func() {
+		close(errs)
+		close(addrs)
+	}()
+
 	ctx, cancel := context.WithCancel(parentCtx)
 	defer cancel()
 
@@ -49,9 +54,6 @@ func (s *Server) run(parentCtx context.Context, addrs chan net.Addr, errs chan e
 		if err := listener.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
 			errs <- errors.WithStack(err)
 		}
-
-		close(errs)
-		close(addrs)
 	}()
 
 	go func() {
