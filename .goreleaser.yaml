@@ -9,7 +9,7 @@ before:
     - make tailwind
     - make dump-config
 builds:
-  - id: frmd
+  - id: deformd
     env:
       - CGO_ENABLED=0
     ldflags:

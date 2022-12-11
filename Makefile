@@ -2,12 +2,15 @@
 LINT_ARGS ?= --timeout 5m
 SHELL = /bin/bash
 TAILWINDCSS_ARGS ?= 
-GORELEASER_VERSION ?= v1.8.3
-GORELEASER_ARGS ?= --auto-snapshot --rm-dist
+GORELEASER_VERSION ?= v1.13.1
+GORELEASER_ARGS ?= build --auto-snapshot --rm-dist
 GITCHLOG_ARGS ?=
 SHELL := /bin/bash
 
 DEFORMD_VERSION ?= 
+
+DOCKER_IMAGE_NAME ?= bornholm/deformd
+DOCKER_IMAGE_TAG ?= $(shell git describe --always)$(if $(shell git diff --stat),-dirty,)
 
 .PHONY: help
 help: ## Display this help
@@ -107,3 +110,9 @@ changelog:
 
 install-git-hooks:
 	git config core.hooksPath .githooks
+
+docker-build:
+	docker build -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) .
+
+docker-release:
+	docker push $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
