@@ -79,6 +79,8 @@ func (s *Server) handleForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logger.Debug(ctx, "resulting messages stack", logger.F("messageStack", messageStack))
+
 	if messageStack.HasError() {
 		data := templateData{
 			BaseURL:  string(s.conf.HTTP.BaseURL),
@@ -103,8 +105,19 @@ func (s *Server) handleForm(w http.ResponseWriter, r *http.Request) {
 			panic(errors.WithStack(err))
 		}
 
+		logger.Debug(
+			ctx, "will redirect to",
+			logger.F("destination", r.URL.String()+"/redirect"),
+			logger.F("customRedirectURL", *redirectURL),
+		)
+
 		http.Redirect(w, r, r.URL.String()+"/redirect", http.StatusSeeOther)
 	} else {
+		logger.Debug(
+			ctx, "will redirect to",
+			logger.F("destination", r.URL.String()),
+		)
+
 		http.Redirect(w, r, r.URL.String(), http.StatusSeeOther)
 	}
 }
