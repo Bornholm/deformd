@@ -10,6 +10,7 @@ import (
 
 	"github.com/Bornholm/deformd/internal/handler/module"
 	"github.com/pkg/errors"
+	"gitlab.com/wpetit/goweb/logger"
 )
 
 func init() {
@@ -47,6 +48,8 @@ func (s *Server) getFlashMessageStack(w http.ResponseWriter, r *http.Request) (*
 
 	s.clearFlash(w, flashKeyMessageStack)
 
+	logger.Debug(r.Context(), "retrieved message stack", logger.F("messageStack", messageStack))
+
 	return module.NewMessageStack(messageStack.Messages...), nil
 }
 
@@ -72,7 +75,11 @@ func (s *Server) getFlashRedirectURL(w http.ResponseWriter, r *http.Request) (st
 
 	s.clearFlash(w, flashKeyRedirectURL)
 
-	return string(data), nil
+	redirectURL := string(data)
+
+	logger.Debug(r.Context(), "retrieved redirect url", logger.F("redirectURL", redirectURL))
+
+	return redirectURL, nil
 }
 
 func (s *Server) setFlashRedirectURL(w http.ResponseWriter, url string) error {
@@ -82,13 +89,13 @@ func (s *Server) setFlashRedirectURL(w http.ResponseWriter, url string) error {
 }
 
 func (s *Server) clearFlash(w http.ResponseWriter, name string) {
-	cookie := &http.Cookie{Name: name, Value: ""}
+	cookie := &http.Cookie{Name: name, Value: "", Path: "/"}
 
 	http.SetCookie(w, cookie)
 }
 
 func (s *Server) setFlash(w http.ResponseWriter, name string, value []byte) {
-	cookie := &http.Cookie{Name: name, Value: encode(value)}
+	cookie := &http.Cookie{Name: name, Value: encode(value), Path: "/"}
 
 	http.SetCookie(w, cookie)
 }
