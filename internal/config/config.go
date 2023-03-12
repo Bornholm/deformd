@@ -29,7 +29,7 @@ func (c *Config) LoadIncludes(baseDir string) error {
 		}
 
 		for _, m := range matches {
-			logger.Debug(context.Background(), "loading included configuration", logger.F("file", m))
+			logger.Info(context.Background(), "loading included configuration", logger.F("file", m))
 
 			data, err := ioutil.ReadFile(m)
 			if err != nil {
@@ -49,7 +49,7 @@ func (c *Config) LoadIncludes(baseDir string) error {
 func NewFromFile(path string) (*Config, error) {
 	config := NewDefault()
 
-	logger.Debug(context.Background(), "loading configuration", logger.F("path", path))
+	logger.Info(context.Background(), "loading configuration", logger.F("path", path))
 
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
