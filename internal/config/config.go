@@ -1,11 +1,13 @@
 package config
 
 import (
+	"context"
 	"io"
 	"io/ioutil"
 	"path/filepath"
 
 	"github.com/pkg/errors"
+	"gitlab.com/wpetit/goweb/logger"
 	"gopkg.in/yaml.v3"
 )
 
@@ -27,6 +29,8 @@ func (c *Config) LoadIncludes(baseDir string) error {
 		}
 
 		for _, m := range matches {
+			logger.Debug(context.Background(), "loading included configuration", logger.F("file", m))
+
 			data, err := ioutil.ReadFile(m)
 			if err != nil {
 				return errors.Wrapf(err, "could not read file '%s'", m)
@@ -45,6 +49,8 @@ func (c *Config) LoadIncludes(baseDir string) error {
 func NewFromFile(path string) (*Config, error) {
 	config := NewDefault()
 
+	logger.Debug(context.Background(), "loading configuration", logger.F("path", path))
+
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not read file '%s'", path)
@@ -59,6 +65,8 @@ func NewFromFile(path string) (*Config, error) {
 	if err := config.LoadIncludes(baseDir); err != nil {
 		return nil, errors.WithStack(err)
 	}
+
+	logger.Debug(context.Background(), "loaded configuration", logger.F("config", config))
 
 	return config, nil
 }

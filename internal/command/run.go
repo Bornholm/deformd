@@ -6,6 +6,7 @@ import (
 
 	"github.com/Bornholm/deformd/internal/command/common"
 	"github.com/Bornholm/deformd/internal/server"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 	_ "github.com/santhosh-tekuri/jsonschema/v5/httploader"
 	"github.com/urfave/cli/v2"
@@ -27,6 +28,8 @@ func Run() *cli.Command {
 
 			logger.SetFormat(logger.Format(conf.Logger.Format))
 			logger.SetLevel(logger.Level(conf.Logger.Level))
+
+			spew.Dump(conf)
 
 			srv := server.New(
 				server.WithConfig(conf),
