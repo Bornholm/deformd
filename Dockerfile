@@ -22,7 +22,8 @@ RUN mkdir -p /usr/local/bin \
 ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 
 COPY --from=BUILD /src/dist/deformd_linux_amd64_v1 /app
-COPY --from=BUILD /src/tmp/config.yml /etc/deformd/config.yml
+RUN mkdir -p /etc/deformd \
+    && /app/deformd config dump > /etc/deformd/config.yml
 
 EXPOSE 3000
 
