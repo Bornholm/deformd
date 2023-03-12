@@ -20,16 +20,22 @@ type Config struct {
 }
 
 func (c *Config) LoadIncludes(baseDir string) error {
+	ctx := context.Background()
+
 	for _, inc := range c.Include {
 		pattern := filepath.Join(baseDir, string(inc))
+
+		logger.Info(ctx, "searching inclusions", logger.F("pattern", inc))
 
 		matches, err := filepath.Glob(pattern)
 		if err != nil {
 			return errors.WithStack(err)
 		}
 
+		logger.Info(ctx, "included files", logger.F("matches", matches))
+
 		for _, m := range matches {
-			logger.Info(context.Background(), "loading included configuration", logger.F("file", m))
+			logger.Info(ctx, "loading included configuration", logger.F("file", m))
 
 			data, err := ioutil.ReadFile(m)
 			if err != nil {
