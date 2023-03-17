@@ -7,7 +7,6 @@ import (
 	"github.com/Bornholm/deformd/internal/command/common"
 	"github.com/Bornholm/deformd/internal/server"
 	"github.com/pkg/errors"
-	_ "github.com/santhosh-tekuri/jsonschema/v5/httploader"
 	"github.com/urfave/cli/v2"
 	"gitlab.com/wpetit/goweb/logger"
 )

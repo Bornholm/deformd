@@ -22,10 +22,15 @@ type Config struct {
 func (c *Config) LoadIncludes(baseDir string) error {
 	ctx := context.Background()
 
-	for _, inc := range c.Include {
-		pattern := filepath.Join(baseDir, string(inc))
+	absBaseDir, err := filepath.Abs(baseDir)
+	if err != nil {
+		return errors.WithStack(err)
+	}
 
-		logger.Info(ctx, "searching inclusions", logger.F("pattern", inc))
+	for _, inc := range c.Include {
+		pattern := filepath.Join(absBaseDir, string(inc))
+
+		logger.Info(ctx, "searching inclusions", logger.F("pattern", pattern))
 
 		matches, err := filepath.Glob(pattern)
 		if err != nil {
@@ -43,7 +48,7 @@ func (c *Config) LoadIncludes(baseDir string) error {
 			}
 
 			if err := yaml.Unmarshal(data, c); err != nil {
-				return errors.Wrapf(err, "could not unmarshal configuration")
+				return errors.Wrapf(err, "could not unmarshal included configuration '%s'", m)
 			}
 		}
 	}

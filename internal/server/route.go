@@ -1,9 +1,11 @@
 package server
 
 import (
+	"bytes"
 	"context"
 	"net/http"
 	"net/url"
+	text "text/template"
 
 	"github.com/Bornholm/deformd/internal/config"
 	"github.com/Bornholm/deformd/internal/form"
@@ -70,6 +72,7 @@ func (s *Server) handleForm(w http.ResponseWriter, r *http.Request) {
 
 	messageStack, ctx := module.WithNewMessageStack(ctx)
 	redirectURL, ctx := module.WithRedirectURL(ctx)
+	redirectMessage, ctx := module.WithRedirectMessage(ctx)
 
 	if err := handler.Process(ctx, r.Form); err != nil {
 		logger.Error(ctx, "could not process form", logger.E(errors.WithStack(err)))
@@ -105,9 +108,14 @@ func (s *Server) handleForm(w http.ResponseWriter, r *http.Request) {
 			panic(errors.WithStack(err))
 		}
 
+		if err := s.setFlashRedirectMessage(w, *redirectMessage); err != nil {
+			panic(errors.WithStack(err))
+		}
+
 		logger.Debug(
 			ctx, "will redirect to",
 			logger.F("destination", r.URL.String()+"/redirect"),
+			logger.F("customRedirectMessage", *redirectMessage),
 			logger.F("customRedirectURL", *redirectURL),
 		)
 
@@ -138,14 +146,43 @@ func (s *Server) handleRedirect(w http.ResponseWriter, r *http.Request) {
 		panic(errors.Wrap(err, "could not retrieve redirect url"))
 	}
 
-	if err := template.Exec("redirect.html.tmpl", w, struct {
-		BaseURL     string
-		Messages    *module.MessageStack
-		RedirectURL string
+	redirectMessage, err := s.getFlashRedirectMessage(w, r)
+	if err != nil {
+		panic(errors.Wrap(err, "could not retrieve redirect message"))
+	}
+
+	tmpl, err := text.New("").Parse(redirectMessage)
+	if err != nil {
+		panic(errors.Wrap(err, "could not parse redirect message"))
+	}
+
+	var buf bytes.Buffer
+
+	delay := 10
+
+	err = tmpl.Execute(&buf, struct {
+		URL   string
+		Delay int
 	}{
-		BaseURL:     string(s.conf.HTTP.BaseURL),
-		Messages:    messageStack,
-		RedirectURL: redirectURL,
+		URL:   redirectURL,
+		Delay: delay,
+	})
+	if err != nil {
+		panic(errors.Wrap(err, "could not parse redirect message"))
+	}
+
+	if err := template.Exec("redirect.html.tmpl", w, struct {
+		BaseURL         string
+		Messages        *module.MessageStack
+		RedirectURL     string
+		RedirectMessage string
+		Delay           int
+	}{
+		BaseURL:         string(s.conf.HTTP.BaseURL),
+		Messages:        messageStack,
+		RedirectURL:     redirectURL,
+		RedirectMessage: buf.String(),
+		Delay:           delay,
 	}); err != nil {
 		panic(errors.WithStack(err))
 	}

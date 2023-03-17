@@ -2,8 +2,9 @@
     {{ template "head" . }}
     <link rel="stylesheet" href="{{ .BaseURL }}assets/dist/main.css" />
     <body class="bg-gray-100 w-full h-full p-3 flex justify-center items-center">
-        <div class="w-full max-w-xs">
+        <div class="w-full max-w-sm">
             <form method="POST" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <h1 class="text-xl leading-tight mb-6">{{ .Form.Title }}</h1>
                 <div class="mb-4">
                     {{ template "messages" . }}
                     {{ $values := .Values }}

@@ -5,7 +5,6 @@
         id="{{ .Field.Name }}" 
         name="{{ .Field.Name }}" 
         type="email" 
-        placeholder="{{ .Field.Name }}" 
         value="{{ .Values.Get .Field.Name }}"
         {{if .Field.Required}}required="true"{{end}}
     >

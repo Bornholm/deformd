@@ -1,0 +1,21 @@
+{{define "form_input_radio"}}
+<div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ .Field.Name }}">{{ .Field.Label }}</label>
+    {{ $root := . }}
+    {{range $index, $entry := .Field.Values}}
+        <div class="mb-[0.125rem] block min-h-[1.5rem]">
+            <input
+                type="radio"
+                name="{{ $root.Field.Name }}"
+                id="{{ $root.Field.Name }}-{{ $index }}"
+                value="{{ $entry.Value }}"
+                {{if eq ( $root.Values.Get $root.Field.Name ) .Value }}checked{{end}} />
+            <label
+                class="mt-px inline-block pl-[0.15rem] hover:cursor-pointer"
+                for="{{ $root.Field.Name }}-{{ $index }}">
+                {{ $entry.Label }}
+            </label>
+        </div>
+    {{end}}
+</div>
+{{end}}

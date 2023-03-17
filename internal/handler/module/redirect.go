@@ -31,6 +31,13 @@ func (m *RedirectModule) to(call goja.FunctionCall, rt *goja.Runtime) goja.Value
 		panic(errors.New("second argument should be a string"))
 	}
 
+	message, ok := call.Argument(2).Export().(string)
+	if ok {
+		if err := SetRedirectMessage(ctx, message); err != nil {
+			panic(errors.Wrap(err, "could not set redirect message on context"))
+		}
+	}
+
 	if err := SetRedirectURL(ctx, url); err != nil {
 		panic(errors.Wrap(err, "could not set redirect url on context"))
 	}
@@ -71,4 +78,33 @@ func GetRedirectURL(ctx context.Context) (*string, error) {
 	}
 
 	return redirectURL, nil
+}
+
+const redirectMessageContextKey contextKey = "redirectMessage"
+
+func GetRedirectMessage(ctx context.Context) (*string, error) {
+	redirectMessage, ok := ctx.Value(redirectMessageContextKey).(*string)
+	if !ok {
+		return nil, errors.New("could not retrieve redirect message on context")
+	}
+
+	return redirectMessage, nil
+}
+
+func WithRedirectMessage(ctx context.Context) (*string, context.Context) {
+	redirectMessage := "You will be redirected in {{ .Delay}}s to '{{ .URL }}'..."
+	ctx = context.WithValue(ctx, redirectMessageContextKey, &redirectMessage)
+
+	return &redirectMessage, ctx
+}
+
+func SetRedirectMessage(ctx context.Context, message string) error {
+	redirectMessagePtr, err := GetRedirectMessage(ctx)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	*redirectMessagePtr = message
+
+	return nil
 }

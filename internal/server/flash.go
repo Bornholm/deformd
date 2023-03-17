@@ -22,8 +22,9 @@ type gobMessageStack struct {
 }
 
 const (
-	flashKeyMessageStack = "message-stack"
-	flashKeyRedirectURL  = "redirect-url"
+	flashKeyMessageStack    = "message-stack"
+	flashKeyRedirectURL     = "redirect-url"
+	flashKeyRedirectMessage = "redirect-message"
 )
 
 func (s *Server) getFlashMessageStack(w http.ResponseWriter, r *http.Request) (*module.MessageStack, error) {
@@ -84,6 +85,27 @@ func (s *Server) getFlashRedirectURL(w http.ResponseWriter, r *http.Request) (st
 
 func (s *Server) setFlashRedirectURL(w http.ResponseWriter, url string) error {
 	s.setFlash(w, flashKeyRedirectURL, []byte(url))
+
+	return nil
+}
+
+func (s *Server) getFlashRedirectMessage(w http.ResponseWriter, r *http.Request) (string, error) {
+	data, err := s.getFlash(w, r, flashKeyRedirectMessage)
+	if err != nil {
+		return "", errors.WithStack(err)
+	}
+
+	s.clearFlash(w, flashKeyRedirectMessage)
+
+	redirectMessage := string(data)
+
+	logger.Debug(r.Context(), "retrieved redirect message", logger.F("redirectMessage", redirectMessage))
+
+	return redirectMessage, nil
+}
+
+func (s *Server) setFlashRedirectMessage(w http.ResponseWriter, message string) error {
+	s.setFlash(w, flashKeyRedirectMessage, []byte(message))
 
 	return nil
 }
