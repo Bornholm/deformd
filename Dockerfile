@@ -3,7 +3,7 @@ FROM golang:1.19 AS BUILD
 RUN apt-get update \
     && apt-get install -y make \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
+    && apt-get install -y nodejs ca-certificates
 
 COPY . /src
 
@@ -24,6 +24,8 @@ ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 COPY --from=BUILD /src/dist/deformd_linux_amd64_v1 /app
 RUN mkdir -p /etc/deformd \
     && /app/deformd config dump > /etc/deformd/config.yml
+
+COPY --from=BUILD /etc/ssl/certs /etc/ssl/certs
 
 EXPOSE 3000
 
